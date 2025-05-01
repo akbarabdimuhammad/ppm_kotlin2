@@ -1,4 +1,5 @@
 package hellocompose.unpas.ac.mynote
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +22,9 @@ fun NoteScreen(modifier: Modifier = Modifier) {
 
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
+    var isEditing by remember { mutableStateOf(false) }
+    var editingNoteId by remember { mutableStateOf<String?>(null) }
+
     val scope = rememberCoroutineScope()
 
     Column(modifier = modifier.padding(16.dp)) {
@@ -40,19 +44,47 @@ fun NoteScreen(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(
-            onClick = {
-                if (title.isNotEmpty() && description.isNotEmpty()) {
-                    scope.launch {
-                        dao.insertNote(Note(uuid4().toString(), title, description))
-                        title = ""
-                        description = ""
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Button(
+                onClick = {
+                    if (title.isNotEmpty() && description.isNotEmpty()) {
+                        scope.launch {
+                            if (isEditing && editingNoteId != null) {
+                                // Update note
+                                dao.insertNote(Note(editingNoteId!!, title, description))
+                                Toast.makeText(context, "Note updated", Toast.LENGTH_SHORT).show()
+                            } else {
+                                // Insert new note
+                                dao.insertNote(Note(uuid4().toString(), title, description))
+                                Toast.makeText(context, "Note saved", Toast.LENGTH_SHORT).show()
+                            }
+                            title = ""
+                            description = ""
+                            isEditing = false
+                            editingNoteId = null
+                        }
+                    } else {
+                        Toast.makeText(context, "Semua input harus diisi", Toast.LENGTH_SHORT).show()
                     }
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Save Note")
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(if (isEditing) "Update Note" else "Save Note")
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Button(
+                onClick = {
+                    title = ""
+                    description = ""
+                    isEditing = false
+                    editingNoteId = null
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Reset")
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -64,23 +96,46 @@ fun NoteScreen(modifier: Modifier = Modifier) {
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth()
-                    ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
                         Text(note.title, style = MaterialTheme.typography.titleMedium)
                         Text(note.description, style = MaterialTheme.typography.bodyMedium)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Button(
-                            onClick = {
-                                scope.launch {
-                                    dao.deleteNote(note)
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Delete Note")
+
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Button(
+                                onClick = {
+                                    // Edit
+                                    title = note.title
+                                    description = note.description
+                                    editingNoteId = note.id
+                                    isEditing = true
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text("Edit")
+                            }
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Button(
+                                onClick = {
+                                    scope.launch {
+                                        dao.deleteNote(note)
+                                        Toast.makeText(context, "Note deleted", Toast.LENGTH_SHORT).show()
+                                        if (isEditing && editingNoteId == note.id) {
+                                            // Batal edit kalau note yang diedit dihapus
+                                            title = ""
+                                            description = ""
+                                            isEditing = false
+                                            editingNoteId = null
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                            ) {
+                                Text("Delete")
+                            }
                         }
                     }
                 }
