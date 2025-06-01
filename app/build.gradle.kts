@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "id.ac.unpas.mynote"
+    namespace = "hellocompose.unpas.ac.mynote"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "id.ac.unpas.mynote"
+        applicationId = "hellocompose.unpas.ac.mynote"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
