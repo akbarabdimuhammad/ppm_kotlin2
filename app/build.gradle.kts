@@ -4,14 +4,15 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+    alias(libs.plugins.hilt.android)
 }
 
 android {
-    namespace = "hellocompose.unpas.ac.mynote"
+    namespace = "id.ac.unpas.mynote"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "hellocompose.unpas.ac.mynote"
+        applicationId = "id.ac.unpas.mynote"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -41,11 +42,7 @@ android {
     buildFeatures {
         compose = true
     }
-}
 
-room {
-    schemaDirectory = file("$projectDir/schemas")
-}
 
 dependencies {
     implementation(libs.androidx.core.ktx)
@@ -56,17 +53,31 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
     testImplementation(libs.junit)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.compose.runtime.livedata)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
     implementation(libs.benasher44.uuid)
+    implementation(libs.dagger.hilt.android)
+    ksp(libs.dagger.hilt.compiler)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.hilt.navigation.compose)
+
+    implementation(libs.skydoves.sandwich)
+    implementation(libs.skydoves.sandwich.retrofit)
+    implementation(libs.skydoves.whatif)
+    implementation(libs.retrofit.converter.gson)
 }
