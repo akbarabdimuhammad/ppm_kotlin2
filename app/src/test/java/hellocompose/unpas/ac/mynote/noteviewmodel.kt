@@ -50,12 +50,9 @@ class NoteViewModel @Inject constructor(private val noteRepository: NoteReposito
         }
     }
 
-    fun updateNote(id: String, note: Note) {
+    fun updateNote(note: Note, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
-            noteRepository.update(id, note, onSuccess = {
-                Log.d("NoteViewModel", "update note success")
-                refreshList()
-            }, onError = {
+            repository.updateNote(note, onSuccess, onError) {
                 Log.d("NoteViewModel", "update note error: $it")
             })
         }

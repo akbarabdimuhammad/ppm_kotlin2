@@ -35,5 +35,15 @@ interface NoteApi {
 
         @DELETE("api/notes/{id}")
         suspend fun delete(@Path("id") id: String): ApiResponse<DeleteResponse>
+        interface NoteApi {
+            // Fungsi lain...
+
+            @PUT("notes/{id}")
+            suspend fun update(
+                @Path("id") id: String,
+                @Body note: Note
+            ): Note
+        }
+
     }
 }

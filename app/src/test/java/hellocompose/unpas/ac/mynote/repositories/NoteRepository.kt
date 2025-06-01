@@ -20,7 +20,13 @@ class NoteRepository {
         private val api: NoteApi,
         private val dao: NoteDao
     ) {
-
+        try {
+            val response = api.update(note.id, note)
+            dao.update(response)
+            onSuccess()
+        } catch (e: Exception) {
+            onError(e.message ?: "Unknown error")
+        }
         @WorkerThread
         fun loadItems(
             onSuccess: () -> Unit,
