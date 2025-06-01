@@ -1,22 +1,47 @@
 package hellocompose.unpas.ac.mynote.di
 
-import dagger .Module
+import com.skydoves.sandwich.retrofit.adapters.ApiResponseCallAdapterFactory
+import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
-import dagger.hilt.android.scopes.ViewModelScoped
-import hellocompose.unpas.ac.mynote.dao.NoteDao
-import hellocompose.unpas.ac.mynote.NoteApi
-import hellocompose.unpas.ac.mynote.NoteRepository
+import dagger.hilt.components.SingletonComponent
+import hellocompose.unpas.ac.mynote.LoginApi
+import hellocompose.unpas.ac.mynote.networks.NoteApi
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Singleton
+
 @Module
-@InstallIn(ViewModelComponent:: class)
-object RepositoryModule {
+@InstallIn(SingletonComponent::class)
+object NetworkModule {
+
     @Provides
-    @ViewModelScoped
-    fun provideNoteRepository(
-        api: NoteApi,
-        dao: NoteDao
-    ): NoteRepository {
-        return NoteRepository(api, dao)
-        ｝
+    @Singleton
+    fun provideOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder().build()
     }
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .client(okHttpClient)
+            .baseUrl("https://my-note.gusdya.net/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideNoteApi(retrofit: Retrofit): NoteApi {
+        return retrofit.create(NoteApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideLoginApi(retrofit: Retrofit): LoginApi {
+        return retrofit.create(LoginApi::class.java)
+    }
+}

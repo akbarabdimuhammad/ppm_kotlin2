@@ -1,4 +1,4 @@
-package hellocompose.unpas.ac.mynote
+package hellocompose.unpas.ac.mynote.ui.screens
 
 import org.junit.Test
 
