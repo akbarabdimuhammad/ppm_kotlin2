@@ -1,4 +1,4 @@
-package hellocompose.unpas.ac.myapp
+package hellocompose.unpas.ac.mynote
 
 import org.junit.Test
 

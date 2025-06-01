@@ -1,7 +1,13 @@
 package hellocompose.unpas.ac.mynote
 
 import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.liveData
+import androidx.lifecycle.switchMap
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import hellocompose.unpas.ac.mynote.models.Note
 import hellocompose.unpas.ac.mynote.repositories.NoteRepository
@@ -10,9 +16,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class NoteViewModel @Inject constructor(
-    private val noteRepository: NoteRepository
-) : ViewModel() {
+class NoteViewModel @Inject constructor(private val noteRepository: NoteRepository) : ViewModel() {
 
     private val _loadList: MutableLiveData<Boolean> = MutableLiveData(false)
 
@@ -31,37 +35,40 @@ class NoteViewModel @Inject constructor(
         }
     }
 
-    fun refresh() {
-        _loadList.value = true
+    fun refreshList() {
+        _loadList.value = _loadList.value != true
     }
 
     fun insertNote(note: Note) {
         viewModelScope.launch {
-            noteRepository.insert(
-                note,
-                onSuccess = {
-                    Log.d("NoteViewModel", "insert note success")
-                    refresh()
-                },
-                onError = {
-                    Log.d("NoteViewModel", it)
-                }
-            )
+            noteRepository.insert(note, onSuccess = {
+                Log.d("NoteViewModel", "insert note success")
+                refreshList()
+            }, onError = {
+                Log.d("NoteViewModel", "insert note error: $it")
+            })
+        }
+    }
+
+    fun updateNote(id: String, note: Note) {
+        viewModelScope.launch {
+            noteRepository.update(id, note, onSuccess = {
+                Log.d("NoteViewModel", "update note success")
+                refreshList()
+            }, onError = {
+                Log.d("NoteViewModel", "update note error: $it")
+            })
         }
     }
 
     fun deleteNote(note: Note) {
         viewModelScope.launch {
-            noteRepository.delete(
-                note.id,
-                onSuccess = {
-                    Log.d("NoteViewModel", "delete note success")
-                    refresh()
-                },
-                onError = {
-                    Log.d("NoteViewModel", it)
-                }
-            )
+            noteRepository.delete(note.id, onSuccess = {
+                Log.d("NoteViewModel", "delete note success")
+                refreshList()
+            }, onError = {
+                Log.d("NoteViewModel", "delete note error: $it")
+            })
         }
     }
 }
